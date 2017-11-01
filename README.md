@@ -1,5 +1,17 @@
 # sgminer
 
+## Cuckoo-Cycle PoW version - please read carefully
+
+This version is a reference implementation* for the cuckoo-cycle pow miner.
+This version of the cuckoo-cycle pow miner runs on CUDA and not OpenCL.
+In addition to the regular build instructions, you will also need to install CUDA.
+(You will still need to install OpenCL)
+
+If you encouter any build problems, please open an issue so they can be documented.
+
+*The version implemented here is taken from the cuckoo cycle repository.
+It is not a fully optimized implementation
+Please contibute by updating the implementation to a faster and optimized implementation
 
 ## Introduction
 
@@ -12,7 +24,7 @@ cpuminer by Jeff Garzik (jgarzik).
 
 **git tree**: https://github.com/sgminer-dev/sgminer
 
-**bugtracker**: https://github.com/sgminer-dev/sgminer/issues
+**bugtracker**: https://github.com/hodlor1/sgminer/issues
 
 **irc**: `#sgminer` and `#sgminer-dev` on freenode
 
