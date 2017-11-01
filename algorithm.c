@@ -34,6 +34,7 @@
 #include "algorithm/whirlpoolx.h"
 #include "algorithm/lyra2re.h"
 #include "algorithm/pluck.h"
+#include "algorithm/cuckoo.h"
 
 #include "compat.h"
 
@@ -58,7 +59,8 @@ const char *algorithm_type_str[] = {
   "Neoscrypt",
   "WhirlpoolX",
   "Lyra2RE",
-  "Pluck"
+  "Pluck",
+  "Cuckoo"
 };
 
 void sha256(const unsigned char *message, unsigned int len, unsigned char *digest)
@@ -805,6 +807,28 @@ static algorithm_settings_t algos[] = {
 
   { "whirlcoin", ALGO_WHIRL, "", 1, 1, 1, 0, 0, 0xFF, 0xFFFFULL, 0x0000ffffUL, 3, 8 * 16 * 4194304, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, whirlcoin_regenhash, queue_whirlcoin_kernel, sha256, NULL },
   { "whirlpoolx", ALGO_WHIRLPOOLX, "", 1, 1, 1, 0, 0, 0xFFU, 0xFFFFULL, 0x0000FFFFUL, 0, 0, 0, whirlpoolx_regenhash, queue_whirlpoolx_kernel, gen_hash, NULL },
+
+  // Cuckoo cycle
+  { "cuckoo", ALGO_CUCKOO, "", 1, 1, 1, 0, 0, 0xFF, 0xFFFFULL, 0xffffffffUL, 0, 0, 0, cuckoo_regenhash, queue_whirlcoin_kernel, gen_hash, NULL },
+/*
+	const char *name;
+	algorithm_type_t type;
+	const char *kernelfile;
+	double   diff_multiplier1;
+	double   diff_multiplier2;
+	double   share_diff_multiplier;
+	uint32_t xintensity_shift;
+	uint32_t intensity_shift;
+	uint32_t found_idx;
+	unsigned long long   diff_numerator;
+	uint32_t diff1targ;
+	size_t n_extra_kernels;
+	long rw_buffer_size;
+	cl_command_queue_properties cq_properties;
+	void     (*regenhash)(struct work *);
+	cl_int   (*queue_kernel)(struct __clState *, struct _dev_blk_ctx *, cl_uint);
+	void     (*gen_hash)(const unsigned char *, unsigned int, unsigned char *);
+	void     (*set_compile_options)(build_kernel_data *, struct cgpu_info *, algorithm_t *);*/
 
   // Terminator (do not remove)
   { NULL, ALGO_UNK, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL }

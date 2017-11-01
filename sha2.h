@@ -32,11 +32,10 @@
  * SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "miner.h"
-
 #ifndef SHA2_H
 #define SHA2_H
+
+#include <stdint.h>
 
 #define SHA256_DIGEST_SIZE ( 256 / 8)
 #define SHA256_BLOCK_SIZE  ( 512 / 8)

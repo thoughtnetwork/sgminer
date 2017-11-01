@@ -229,7 +229,8 @@ static inline int fsync (int fd)
  * the *_PARSE_COMMANDS macros for each listed driver.
  */
 #define DRIVER_PARSE_COMMANDS(DRIVER_ADD_COMMAND) \
-  DRIVER_ADD_COMMAND(opencl)
+  DRIVER_ADD_COMMAND(opencl) \
+  DRIVER_ADD_COMMAND(cuda)
 
 #define DRIVER_ENUM(X) DRIVER_##X,
 #define DRIVER_PROTOTYPE(X) struct device_drv X##_drv;
@@ -1409,6 +1410,7 @@ struct work {
   unsigned char midstate[32];
   unsigned char target[32];
   unsigned char hash[32];
+  unsigned char pow[256];
 
   unsigned char device_target[32];
   double    device_diff;
@@ -1418,6 +1420,7 @@ struct work {
   int   drv_rolllimit; /* How much the driver can roll ntime */
 
   dev_blk_ctx blk;
+  uint32_t cuda_nonce_offset;
 
   struct thr_info *thr;
   int   thr_id;

@@ -31,7 +31,6 @@
 #include <ccan/opt/opt.h>
 #include <jansson.h>
 #include <libgen.h>
-#include <sha2.h>
 
 #include "compat.h"
 #include "miner.h"

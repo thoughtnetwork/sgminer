@@ -1661,10 +1661,11 @@ static bool parse_diff(struct pool *pool, json_t *val)
   double old_diff, diff;
 
   if (opt_diff_mult == 0.0)
-    diff = json_number_value(json_array_get(val, 0)) * pool->algorithm.diff_multiplier1;
+    diff = json_real_value(json_array_get(val, 0)) * pool->algorithm.diff_multiplier1;
   else
-    diff = json_number_value(json_array_get(val, 0)) * opt_diff_mult;
+    diff = json_real_value(json_array_get(val, 0)) * opt_diff_mult;
 
+  applog(LOG_DEBUG, "***** GOT DIFF: %f, %f", diff, pool->algorithm.diff_multiplier1);
   if (diff == 0)
     return false;
 

@@ -55,6 +55,7 @@ char *curly = ":D";
 #include "findnonce.h"
 #include "adl.h"
 #include "driver-opencl.h"
+#include "driver-cuda.h"
 #include "bench_block.h"
 
 #include "algorithm.h"
@@ -3997,7 +3998,7 @@ static double share_diff(const struct work *work)
     s64 = 0;
 
   ret = d64 / s64;
-  applog(LOG_DEBUG, "Found share with difficulty %.3f", ret);
+  applog(LOG_DEBUG, "Found share with difficulty %.11f", ret);
 
   cg_wlock(&control_lock);
   if (unlikely(ret > best_diff)) {
@@ -5533,7 +5534,7 @@ static void *stratum_sthread(void *userdata)
     quit(1, "Failed to create stratum_q in stratum_sthread");
 
   while (42) {
-    char noncehex[12], nonce2hex[20], s[1024];
+    char noncehex[12], nonce2hex[20], s[2048], cuckoo[512], cuckooNonceHexTemp[12];
     struct stratum_share *sshare;
     uint32_t *hash32, nonce;
     unsigned char nonce2[8];
@@ -5575,20 +5576,37 @@ static void *stratum_sthread(void *userdata)
     else {
       nonce = *((uint32_t *)(work->data + 76));
     }
+    applog(LOG_DEBUG, "**** nonce to send: %d, %x",nonce, nonce);
     __bin2hex(noncehex, (const unsigned char *)&nonce, 4);
+    applog(LOG_DEBUG, "**** as hex: %s", noncehex);
 
     *((uint64_t *)nonce2) = htole64(work->nonce2);
     __bin2hex(nonce2hex, nonce2, work->nonce2_len);
-    memset(s, 0, 1024);
+    memset(s, 0, sizeof(s));
 
     mutex_lock(&sshare_lock);
     /* Give the stratum share a unique id */
     sshare->id = swork_id++;
     mutex_unlock(&sshare_lock);
 
+    memset(cuckoo, 0, sizeof(cuckoo));
+    if (!safe_cmp(pool->algorithm.name, "cuckoo")) {
+        uint32_t *cuckoo_proof = (uint32_t *)work->pow;
+        int i, off = 0;
+        off = snprintf(cuckoo, sizeof(cuckoo), ", [");
+        for (i = 0; i < 42; i++) {
+			__bin2hex(cuckooNonceHexTemp, (const unsigned char *)&cuckoo_proof[i], 4);
+			
+            const char *delim = (i == 41) ? "" : ",";
+            off += snprintf(cuckoo + off, sizeof(cuckoo) - off, "\"%s\"%s",
+                           cuckooNonceHexTemp, delim);
+        }
+        off += snprintf(cuckoo + off, sizeof(cuckoo) - off, "]");
+    }
+
     snprintf(s, sizeof(s),
-      "{\"params\": [\"%s\", \"%s\", \"%s\", \"%s\", \"%s\"], \"id\": %d, \"method\": \"mining.submit\"}",
-      pool->rpc_user, work->job_id, nonce2hex, work->ntime, noncehex, sshare->id);
+      "{\"params\": [\"%s\", \"%s\", \"%s\", \"%s\", \"%s\"%s], \"id\": %d, \"method\": \"mining.submit\"}",
+      pool->rpc_user, work->job_id, nonce2hex, work->ntime, noncehex, cuckoo, sshare->id);
 
     applog(LOG_INFO, "Submitting share %08lx to %s", (long unsigned int)htole32(hash32[6]), get_pool_name(pool));
 
@@ -6056,6 +6074,7 @@ static void gen_stratum_work(struct pool *pool, struct work *work)
   memcpy(pool->coinbase + pool->nonce2_offset, &nonce2le, pool->n2size);
   work->nonce2 = pool->nonce2++;
   work->nonce2_len = pool->n2size;
+  work->cuda_nonce_offset = 0;
 
   /* Downgrade to a read lock to read off the pool variables */
   cg_dwlock(&pool->data_lock);
@@ -7347,7 +7366,7 @@ void *miner_thread(void *userdata)
   struct device_drv *drv = cgpu->drv;
   char threadname[16];
 
-        snprintf(threadname, sizeof(threadname), "%d/Miner", thr_id);
+  snprintf(threadname, sizeof(threadname), "%d/Miner", thr_id);
   RenameThread(threadname);
 
   thread_reportout(mythr);
@@ -8724,7 +8743,7 @@ int main(int argc, char *argv[])
 #endif
 
   /* Default algorithm specified in algorithm.c ATM */
-  set_algorithm(&default_profile.algorithm, "scrypt");
+  set_algorithm(&default_profile.algorithm, "cuckoo");
 
   devcursor = 8;
   logstart = devcursor + 1;
@@ -8804,7 +8823,7 @@ int main(int argc, char *argv[])
   DRIVER_PARSE_COMMANDS(DRIVER_FILL_DEVICE_DRV)
 
   // this will set total_devices
-  opencl_drv.drv_detect();
+  cuda_drv.drv_detect();
 
   if (opt_display_devs) {
     applog(LOG_ERR, "Devices detected:");

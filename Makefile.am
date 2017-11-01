@@ -11,12 +11,13 @@ EXTRA_DIST	= example.conf m4/gnulib-cache.m4 \
 SUBDIRS		= lib submodules ccan sph
 
 bin_PROGRAMS     = sgminer
-
 sgminer_CPPFLAGS = $(PTHREAD_FLAGS) -std=gnu99 $(JANSSON_CPPFLAGS)
+sgminer_CPPFLAGS += -g -ggdb -O0
 sgminer_LDFLAGS  = $(PTHREAD_FLAGS)
+sgminer_LDFLAGS  += -g -ggdb
 sgminer_LDADD    = $(DLOPEN_FLAGS) @LIBCURL_LIBS@ @JANSSON_LIBS@ @PTHREAD_LIBS@ \
 		  @OPENCL_LIBS@ @NCURSES_LIBS@ @PDCURSES_LIBS@ @WS2_LIBS@ \
-		  @MM_LIBS@ @RT_LIBS@ @MATH_LIBS@ lib/libgnu.a ccan/libccan.a sph/libsph.a
+		  @MM_LIBS@ @RT_LIBS@ @MATH_LIBS@ lib/libgnu.a ccan/libccan.a sph/libsph.a algorithm/cuckoo_cuda.a -lcudart -lstdc++
 
 sgminer_CPPFLAGS += -I$(top_builddir)/lib -I$(top_srcdir)/lib @OPENCL_FLAGS@
 
@@ -37,6 +38,7 @@ sgminer_SOURCES	+= elist.h miner.h compat.h bench_block.h
 sgminer_SOURCES	+= util.c util.h uthash.h
 sgminer_SOURCES	+= logging.c logging.h
 sgminer_SOURCES += driver-opencl.c driver-opencl.h
+sgminer_SOURCES += driver-cuda.c driver-cuda.h
 sgminer_SOURCES += ocl.c ocl.h
 sgminer_SOURCES += findnonce.c findnonce.h
 sgminer_SOURCES += adl.c adl.h adl_functions.h
@@ -70,6 +72,14 @@ sgminer_SOURCES += algorithm/neoscrypt.c algorithm/neoscrypt.h
 sgminer_SOURCES += algorithm/whirlpoolx.c algorithm/whirlpoolx.h
 sgminer_SOURCES += algorithm/lyra2re.c algorithm/lyra2re.h algorithm/lyra2.c algorithm/lyra2.h algorithm/sponge.c algorithm/sponge.h
 sgminer_SOURCES += algorithm/pluck.c algorithm/pluck.h
+#sgminer_SOURCES += algorithm/cuckoo.c algorithm/memlayout30_mt.h algorithm/siphash_avx2.h
+CUDA_SOURCES := algorithm/cuckoo_cuda.cu algorithm/cuckoo.h algorithm/siphash.h
+sgminer_SOURCES += $(CUDA_SOURCES) algorithm/cuckoo.c
+
+
+CUDA_SM := sm_30
+algorithm/cuckoo_cuda.a: $(CUDA_SOURCES)
+	nvcc -arch $(CUDA_SM) -lib -o $@ $(subst .a,.cu,$@)
 
 bin_SCRIPTS	= $(top_srcdir)/kernel/*.cl
 
