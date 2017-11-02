@@ -1,4 +1,4 @@
-# sgminer
+# sgminer: Cuckoo-Cycle
 
 ## Cuckoo-Cycle PoW version - please read carefully
 
