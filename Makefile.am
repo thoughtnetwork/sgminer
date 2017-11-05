@@ -72,7 +72,6 @@ sgminer_SOURCES += algorithm/neoscrypt.c algorithm/neoscrypt.h
 sgminer_SOURCES += algorithm/whirlpoolx.c algorithm/whirlpoolx.h
 sgminer_SOURCES += algorithm/lyra2re.c algorithm/lyra2re.h algorithm/lyra2.c algorithm/lyra2.h algorithm/sponge.c algorithm/sponge.h
 sgminer_SOURCES += algorithm/pluck.c algorithm/pluck.h
-#sgminer_SOURCES += algorithm/cuckoo.c algorithm/memlayout30_mt.h algorithm/siphash_avx2.h
 CUDA_SOURCES := algorithm/cuckoo_cuda.cu algorithm/cuckoo.h algorithm/siphash.h
 sgminer_SOURCES += $(CUDA_SOURCES) algorithm/cuckoo.c
 
