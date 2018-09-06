@@ -67,10 +67,10 @@ __device__ __forceinline__ uint64_t devectorize(uint2 x) {
 }
 __device__ node_t dipnode(siphash_keys &keys, edge_t nce, u32 uorv) {
   uint2 nonce = vectorize(2*nce + uorv);
-  uint2 v0 = vectorize(keys.k0 ^ 0x736f6d6570736575ULL),
-        v1 = vectorize(keys.k1 ^ 0x646f72616e646f6dULL),
-        v2 = vectorize(keys.k0 ^ 0x6c7967656e657261ULL),
-        v3 = vectorize(keys.k1 ^ 0x7465646279746573ULL) ^ nonce;
+  uint2 v0 = vectorize(keys.k0),
+        v1 = vectorize(keys.k1),
+        v2 = vectorize(keys.k2),
+        v3 = vectorize(keys.k3) ^ nonce;
   SIPROUND; SIPROUND;
   v0 ^= nonce;
   v2 ^= vectorize(0xff);
@@ -82,8 +82,7 @@ __device__ node_t dipnode(siphash_keys &keys, edge_t nce, u32 uorv) {
 
 __device__ node_t dipnode(siphash_keys &keys, edge_t nce, u32 uorv) {
   u64 nonce = 2*nce + uorv;
-  u64 v0 = keys.k0 ^ 0x736f6d6570736575ULL, v1 = keys.k1 ^ 0x646f72616e646f6dULL,
-      v2 = keys.k0 ^ 0x6c7967656e657261ULL, v3 = keys.k1 ^ 0x7465646279746573ULL ^ nonce;
+  u64 v0 = keys.k0, v1 = keys.k1, v2 = keys.k2, v3 = keys.k3 ^ nonce;
   SIPROUND; SIPROUND;
   v0 ^= nonce;
   v2 ^= 0xff;
@@ -119,7 +118,6 @@ __device__ node_t dipnode(siphash_keys &keys, edge_t nce, u32 uorv) {
 #endif
 
 #define NODEBITS (EDGEBITS + 1)
-#define NNODES (2 * NEDGES)
 #define NODEMASK (NNODES-1)
 
 // grow with cube root of size, hardly affected by trimming

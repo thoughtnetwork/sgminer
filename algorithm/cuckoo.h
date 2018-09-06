@@ -17,7 +17,7 @@ void sha256(const unsigned char *message, unsigned int len, unsigned char *diges
 #ifndef EDGEBITS
 // the main parameter is the 2-log of the graph size,
 // which is the size in bits of the node identifiers
-#define EDGEBITS 19
+#define EDGEBITS 23
 #endif
 #ifndef PROOFSIZE
 // the next most important parameter is the (even) length
@@ -38,6 +38,8 @@ typedef u32 node_t;
 
 // number of edges
 #define NEDGES ((node_t)1 << EDGEBITS)
+#define NNODES (2 * NEDGES)
+
 // used to mask siphash output
 #define EDGEMASK ((edge_t)NEDGES - 1)
 
@@ -73,7 +75,7 @@ int verify(edge_t nonces[PROOFSIZE], const char *header, const u32 headerlen) {
   node_t uvs[2*PROOFSIZE];
   node_t xor0=0,xor1=0;
   for (u32 n = 0; n < PROOFSIZE; n++) {
-    if (nonces[n] > EDGEMASK)
+    if (nonces[n] > (node_t)NNODES)
       return POW_TOO_BIG;
     if (n && nonces[n] <= nonces[n-1])
       return POW_TOO_SMALL;

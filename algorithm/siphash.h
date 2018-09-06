@@ -19,6 +19,8 @@ typedef uint64_t u64;
 typedef struct {
   u64 k0;
   u64 k1;
+  u64 k2;
+  u64 k3;
 } siphash_keys;
  
 #define U8TO64_LE(p) ((p))
@@ -27,6 +29,8 @@ typedef struct {
 static inline void setkeys(siphash_keys *keys, const char *keybuf) {
   keys->k0 = htole64(((u64 *)keybuf)[0]);
   keys->k1 = htole64(((u64 *)keybuf)[1]);
+  keys->k2 = htole64(((u64 *)keybuf)[2]);
+  keys->k3 = htole64(((u64 *)keybuf)[3]);
 }
 
 #define ROTL(x,b) (u64)( ((x) << (b)) | ( (x) >> (64 - (b))) )
@@ -41,8 +45,7 @@ static inline void setkeys(siphash_keys *keys, const char *keybuf) {
  
 // SipHash-2-4 specialized to precomputed key and 8 byte nonces
 static inline u64 siphash24(const siphash_keys *keys, const u64 nonce) {
-  u64 v0 = keys->k0 ^ 0x736f6d6570736575ULL, v1 = keys->k1 ^ 0x646f72616e646f6dULL,
-      v2 = keys->k0 ^ 0x6c7967656e657261ULL, v3 = keys->k1 ^ 0x7465646279746573ULL ^ nonce;
+  u64 v0 = keys->k0, v1 = keys->k1, v2 = keys->k2, v3 = keys->k3 ^ nonce;
   SIPROUND; SIPROUND;
   v0 ^= nonce;
   v2 ^= 0xff;
