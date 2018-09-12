@@ -2,33 +2,30 @@
 
 ## Cuckoo-Cycle PoW version - please read carefully
 
-This version is a reference implementation* for the cuckoo-cycle pow miner.
-This version of the cuckoo-cycle pow miner runs on CUDA and not OpenCL.
-In addition to the regular build instructions, you will also need to install CUDA.
-(You will still need to install OpenCL)
+This version is a reference implementation for the cuckoo-cycle pow miner.
+This version of the cuckoo-cycle pow miner runs on CUDA. In addition to the
+regular build instructions, you will also need to install both CUDA and
+OpenCL.
 
-If you encouter any build problems, please open an issue so they can be documented.
+If you encouter any build problems, please open an issue so they can be
+documented.
 
-*The version implemented here is taken from the cuckoo cycle repository.
-It is not a fully optimized implementation
-Please contibute by updating the implementation to a faster and optimized implementation
+The version implemented here is forked from the [bitcoin resilience fork of
+sgminer](https://github.com/hodlor1/sgminer) and is not yet fully optimized.
+Any algorithms other than cuckoo are unsupported, may or may not work, and may
+be removed at any time.
 
 ## Introduction
 
-This is a multi-threaded multi-pool GPU miner with ATI GPU monitoring,
-(over)clocking and fanspeed support for scrypt-based cryptocurrency. It is
-based on cgminer by Con Kolivas (ckolivas), which is in turn based on
-cpuminer by Jeff Garzik (jgarzik).
+This is a multi-threaded multi-pool cuckoo-cycle GPU miner. It is based on the
+bitcoin resilience fork of sgminer, which is based on cgminer by Con Kolivas
+(ckolivas), which is in turn based on cpuminer by Jeff Garzik (jgarzik).
 
-**releases**: https://github.com/sgminer-dev/sgminer/releases
+**releases**: https://github.com/thoughtnetwork/sgminer/releases
 
-**git tree**: https://github.com/sgminer-dev/sgminer
+**git tree**: https://github.com/thoughtnetwork/sgminer
 
-**bugtracker**: https://github.com/hodlor1/sgminer/issues
-
-**irc**: `#sgminer` and `#sgminer-dev` on freenode
-
-**mailing lists**: https://sourceforge.net/p/sgminer/mailman/
+**bugtracker**: https://github.com/thoughtnetwork/sgminer/issues
 
 License: GPLv3.  See `COPYING` for details.
 
@@ -60,15 +57,17 @@ submit a pull request.
 
 Mandatory:
 
-* [curl dev library](http://curl.haxx.se/libcurl/) - `libcurl4-openssl-dev` on Debian
+* [curl dev library](http://curl.haxx.se/libcurl/) - `libcurl4-openssl-dev` on
+  Debian
 * [pkg-config](http://www.freedesktop.org/wiki/Software/pkg-config)
 * [libtool](http://www.gnu.org/software/libtool/)
-* [AMD APP SDK](http://developer.amd.com/tools-and-sdks/heterogeneous-computing/amd-accelerated-parallel-processing-app-sdk/downloads/)	- available under various names as a package on different GNU/Linux distributions
+* [NVIDIA CUDA toolkit](https://developer.nvidia.com/cuda-toolkit)
+  (available under various names as a package on most GNU/Linux distributions)
 
 Optional:
 
-* curses dev library - `libncurses5-dev` on Debian or `libpdcurses` on WIN32, for text user interface
-* [AMD ADL SDK](http://developer.amd.com/tools-and-sdks/graphics-development/display-library-adl-sdk/) - version 6, required for ATI GPU monitoring & clocking
+* curses dev library (`libncurses5-dev` on Debian or `libpdcurses` on WIN32)
+  for text user interface
 
 If building from git:
 
@@ -83,14 +82,10 @@ sgminer-specific configuration options:
 
 #### Debian Example
 
-    apt-get install libcurl4-openssl-dev pkg-config libtool libncurses5-dev
-AMD APP SDK and AMD ADL SDK must be downloaded from the amd websites.
+    apt-get install libcurl4-openssl-dev pkg-config libtool libncurses5-dev nvidia-cuda-toolkit
 
 ### *nix build instructions
 
-If needed, place include headers (`*.h` files) from `ADL_SDK_*<VERSION>*.zip` in `sgminer/ADL_SDK`.
-
-Then:
 
     git submodule init
     git submodule update
@@ -98,12 +93,12 @@ Then:
     CFLAGS="-O2 -Wall -march=native -std=gnu99" ./configure <options>
     make
 
-To compile a version that can be used accross machines, remove
+To compile a version that can be used across machines, remove
 `-march=native`.
 
 To compile a debug version, replace `-O2` with `-ggdb`.
 
-Depending on your environment, replace `-std=gnu99` with `-std=c99`.
+If not using GCC, replace `-std=gnu99` with `-std=c99`.
 
 Systemwide installation is optional. You may run `sgminer` from the build
 directory directly, or `make install` if you wish to install
